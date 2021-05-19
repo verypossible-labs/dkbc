@@ -6,6 +6,7 @@ import re
 import os
 import time
 import urllib
+from . import dkbc_codes
 from pprint import pprint
 
 DEFAULT_API_URL = "api.digikey.com"
@@ -155,6 +156,41 @@ class DKBC:
 
         conn.request(
             "POST", "/Search/v3/Products/Keyword", payload.encode("utf-8"), headers
+        )
+
+        res = conn.getresponse()
+
+        data = json.loads(res.read().decode("utf-8"))
+
+        if "httpMessage" in data and data["httpMessage"] == "Unauthorized":
+            print("Unauthorized! Need to refresh token.")
+
+        return data
+
+    def paramter_search(self, part_no, parameters):
+
+        self.__update_config()
+
+        conn = http.client.HTTPSConnection(self.api_url)
+
+        payload = {"Keywords": part_no, "ExcludeMarketPlaceProducts": 'true',
+                    "Filters": {
+                        "ParametricFilters": parameters
+                        },
+                    "Sort": {
+                        "SortOption": "SortByQuantityAvailable", "Direction": "Descending", "SortParameterId": 0
+                    },
+                    "RecordCount": "50"}
+
+        headers = {
+            "x-DIGIKEY-client-id": self.cfg["client-id"],
+            "authorization": "Bearer " + self.cfg["access-token"],
+            "content-type": "application/json",
+            "accept": "application/json",
+        }
+
+        conn.request(
+            "POST", "/Search/v3/Products/Keyword", json.dumps(payload), headers
         )
 
         res = conn.getresponse()
