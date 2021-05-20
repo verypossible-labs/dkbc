@@ -1,3 +1,8 @@
+# Digikey uses different code ints and strings as ParametricFilter values
+# These were captured using a combination of the codes listed in their docs:
+# https://developer.digikey.com/products/product-information/partsearch/keywordsearch
+# as well as searching for vague keywords and inspecting the returned values.
+
 #ParameterId
 PID = {
     "Package" : 16,
@@ -44,7 +49,7 @@ VID = {
 }
 
 
-def lcr_to_codes(lcr, value="0", *args):
+def lcr_to_codes(lcr, value, *args):
     search = []
     if lcr == "c":
         search.extend(
@@ -59,10 +64,12 @@ def lcr_to_codes(lcr, value="0", *args):
             "ValueId": VID["Category"]["Chip_resistor"]},
             {"ParameterId": PID["Resistance"],
             "ValueId": value}])
-    
-    for a in args:
-        search.append(
-            {"ParameterId": PID[a[0]],
-            "ValueId": VID[a[0]][a[1]]})
+
+    if len(args) > 0:
+        for a in args[0]:
+            b = a.split(',')
+            search.append(
+                {"ParameterId": PID[b[0]],
+                "ValueId": VID[b[0]][b[1]]})
     
     return search
