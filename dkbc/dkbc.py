@@ -167,6 +167,35 @@ class DKBC:
 
         return data
 
+    def get_batch_details(self, part_nos):
+
+            self.__update_config()
+
+            conn = http.client.HTTPSConnection(self.api_url)
+
+            # TODO - escape part_no quotes
+            payload = '{"Products": "' + part_nos + '","RecordCount": "50"}'
+
+            headers = {
+                "x-DIGIKEY-client-id": self.cfg["client-id"],
+                "authorization": "Bearer " + self.cfg["access-token"],
+                "content-type": "application/json",
+                "accept": "application/json",
+            }
+
+            conn.request(
+                "POST", "/BatchSearch/v3/ProductDetails", payload.encode("utf-8"), headers
+            )
+
+            res = conn.getresponse()
+
+            data = json.loads(res.read().decode("utf-8"))
+
+            if "httpMessage" in data and data["httpMessage"] == "Unauthorized":
+                print("Unauthorized! Need to refresh token.")
+
+            return data
+
     def paramter_search(self, part_no, parameters):
 
         self.__update_config()

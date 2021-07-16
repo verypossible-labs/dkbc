@@ -10,6 +10,7 @@ from pprint import pprint
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--search", "-s", nargs="+", type=str, help="Search for parts with filters")
+parser.add_argument("--mpn", "-m", type=str, help="Search for specific MPN")
 parser.add_argument("--outfile", help="CSV output file")
 parser.add_argument("--batch", action="store_true", help="Batch scan")
 parser.add_argument("--debug", action="store_true", help="Debug mode")
@@ -21,8 +22,10 @@ if args.search:
     if args.search[1].find('u') != 0:
         args.search[1] = "u" + args.search[1]
 
-#data = dkbc.paramter_search("0",lcr_to_codes("c","u1uF",['Voltage_rated,100V', 'Package,1206']))
-data = dkbc.paramter_search("0",lcr_to_codes(args.search[0], args.search[1], args.search[2:]))
+    data = dkbc.paramter_search("0",lcr_to_codes(args.search[0], args.search[1], args.search[2:]))
+
+elif args.mpn:
+    data = dkbc.get_part_details(args.mpn)
 
 if args.debug:
     pprint(data)
